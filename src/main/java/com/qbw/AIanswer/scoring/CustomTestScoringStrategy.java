@@ -2,6 +2,7 @@ package com.qbw.AIanswer.scoring;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.qbw.AIanswer.exception.BusinessException;
 import com.qbw.AIanswer.model.dto.question.QuestionContentDTO;
 import com.qbw.AIanswer.model.entity.App;
 import com.qbw.AIanswer.model.entity.Question;
@@ -15,6 +16,8 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.qbw.AIanswer.common.ErrorCode.ANSWER_ERROR;
 
 /**
  * 自定义测评类应用评分策略
@@ -50,10 +53,14 @@ public class CustomTestScoringStrategy implements ScoringStrategy {
         QuestionVO questionVO = QuestionVO.objToVo(question);
         List<QuestionContentDTO> questionContent = questionVO.getQuestionContent();
 
+        if(choices.size() != questionContent.size()) {
+            throw new BusinessException(ANSWER_ERROR, "答案个数不匹配");
+        }
         // 遍历题目列表
-        for (QuestionContentDTO questionContentDTO : questionContent) {
-            // 遍历答案列表
-            for (String answer : choices) {
+        for (int i = 0; i < questionContent.size(); i++) {
+            QuestionContentDTO questionContentDTO = questionContent.get(i);
+            // 查看当前题目的选项
+            String answer = choices.get(i);
                 // 遍历题目中的选项
                 for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
                     // 如果答案和选项的key匹配
@@ -70,7 +77,6 @@ public class CustomTestScoringStrategy implements ScoringStrategy {
                         optionCount.put(result, optionCount.get(result) + 1);
                     }
                 }
-            }
         }
 
         // 3. 遍历每种评分结果，计算哪个结果的得分更高
