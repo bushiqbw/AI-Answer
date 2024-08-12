@@ -1,5 +1,6 @@
 package com.qbw.AIanswer.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -98,6 +99,7 @@ public class UserAnswerController {
         try {
             UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choices, app);
             userAnswerWithResult.setId(newUserAnswerId);
+            userAnswerWithResult.setAppId(null);
             userAnswerService.updateById(userAnswerWithResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,7 +126,7 @@ public class UserAnswerController {
         UserAnswer oldUserAnswer = userAnswerService.getById(id);
         ThrowUtils.throwIf(oldUserAnswer == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldUserAnswer.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldUserAnswer.getUserId().equals(user.getId()) && !userService.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         // 操作数据库
@@ -140,7 +142,7 @@ public class UserAnswerController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUserAnswer(@RequestBody UserAnswerUpdateRequest userAnswerUpdateRequest) {
         if (userAnswerUpdateRequest == null || userAnswerUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -185,7 +187,7 @@ public class UserAnswerController {
      * @return
      */
     @PostMapping("/list/page")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<UserAnswer>> listUserAnswerByPage(@RequestBody UserAnswerQueryRequest userAnswerQueryRequest) {
         long current = userAnswerQueryRequest.getCurrent();
         long size = userAnswerQueryRequest.getPageSize();
@@ -278,6 +280,7 @@ public class UserAnswerController {
     // endregion
     @GetMapping("/generate/id")
     public BaseResponse<Long> generateUserAnswerId() {
+        log.info("随机产生ID");
         return ResultUtils.success(IdUtil.getSnowflakeNextId());
     }
 }

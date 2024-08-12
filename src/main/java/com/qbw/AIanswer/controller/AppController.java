@@ -1,5 +1,6 @@
 package com.qbw.AIanswer.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.qbw.AIanswer.annotation.AuthCheck;
 import com.qbw.AIanswer.common.*;
@@ -88,7 +89,7 @@ public class AppController {
         App oldApp = appService.getById(id);
         ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldApp.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldApp.getUserId().equals(user.getId()) && !userService.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         // 操作数据库
@@ -104,7 +105,7 @@ public class AppController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateApp(@RequestBody AppUpdateRequest appUpdateRequest) {
         if (appUpdateRequest == null || appUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -147,7 +148,7 @@ public class AppController {
      * @return
      */
     @PostMapping("/list/page")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<App>> listAppByPage(@RequestBody AppQueryRequest appQueryRequest) {
         long current = appQueryRequest.getCurrent();
         long size = appQueryRequest.getPageSize();
@@ -249,7 +250,7 @@ public class AppController {
      * @return
      */
     @PostMapping("/review")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> doAppReview(@RequestBody ReviewRequest reviewRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(reviewRequest == null, ErrorCode.PARAMS_ERROR);
         Long id = reviewRequest.getId();
