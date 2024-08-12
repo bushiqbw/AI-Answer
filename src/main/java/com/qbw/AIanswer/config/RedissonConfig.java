@@ -24,11 +24,10 @@ public class RedissonConfig {
 
     @Bean
     public RedissonClient redissonClient() {
-        Config config = new Config();
-        config.useSingleServer()
-                .setAddress("redis://" + host + ":" + port)
-                .setDatabase(database)
-                .setPassword(password);
-        return Redisson.create(config);
+        Config redissonConfig = new Config();
+        String address = String.format("redis://%s:%s", host, port);
+        System.out.println(address);
+        redissonConfig.useSingleServer().setAddress(address).setPassword(password).setDatabase(1);
+        return Redisson.create(redissonConfig);
     }
 }

@@ -81,6 +81,9 @@ public class User implements Serializable {
     @TableLogic
     private Integer isDelete;
 
+    @TableField(exist = false)//只为了前端和后端的验证，该字段不加在数据库表里面
+    private String token;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
